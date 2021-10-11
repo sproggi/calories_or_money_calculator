@@ -17,8 +17,7 @@ class Calculator:
         """Считает кол-во потраченых каллорий/денег за текущий день."""
         today = dt.date.today()
         result = sum(
-            [record.amount for record in self.records if record.date == today]
-                    )
+            [record.amount for record in self.records if record.date == today])
         return result
 
     def get_week_stats(self):
@@ -27,8 +26,7 @@ class Calculator:
         week = (dt.datetime.now() - dt.timedelta(days=7)).date()
         result = sum(
             [record.amount for record in self.records
-                if week <= record.date <= today]
-                    )
+                if week <= record.date <= today])
         return result
 
     def get_today_remained(self):
@@ -60,10 +58,8 @@ class CaloriesCalculator(Calculator):
 
     def get_calories_remained(self):
         """Выводит результат проверки калькулятора калорий за текущий день."""
-        today_calories = self.get_today_stats()
-        limit = self.limit
         calories_remained = self.get_today_remained()
-        if today_calories < limit:
+        if calories_remained > 0:
             return ('Сегодня можно съесть что-нибудь ещё, но с общей '
                     f'калорийностью не более {calories_remained} кКал')
         return 'Хватит есть!'
