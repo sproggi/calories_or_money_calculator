@@ -17,8 +17,7 @@ class Calculator:
         """Считает кол-во потраченых каллорий/денег за текущий день."""
         today = dt.date.today()
         result = sum(
-            [record.amount for record in self.records if record.date == today]
-                    )
+            [record.amount for record in self.records if record.date == today])
         return result
 
     def get_week_stats(self):
@@ -27,8 +26,7 @@ class Calculator:
         week = (dt.datetime.now() - dt.timedelta(days=7)).date()
         result = sum(
             [record.amount for record in self.records
-                if week <= record.date <= today]
-                    )
+                if week <= record.date <= today])
         return result
 
     def get_today_remained(self):
