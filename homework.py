@@ -15,24 +15,25 @@ class Calculator:
 
     def get_today_stats(self):
         """Считает кол-во потраченых каллорий/денег за текущий день."""
-        today = dt.datetime.now().date()
-        result = 0
-        data_records = self.records
-        for record in data_records:
-            if type(record.amount) == int and record.date == today:
-                result += record.amount
+        today = dt.date.today()
+        result = sum(
+            [record.amount for record in self.records if record.date == today]
+                    )
         return result
 
     def get_week_stats(self):
         """Считает кол-во потраченых каллорий/денег за текущую неделю."""
-        today = dt.datetime.now().date()
+        today = dt.date.today()
         week = (dt.datetime.now() - dt.timedelta(days=7)).date()
-        result = 0
-        data_records = self.records
-        for record in data_records:
-            if type(record.amount) == int and week <= record.date <= today:
-                result += record.amount
+        result = sum(
+            [record.amount for record in self.records
+                if week <= record.date <= today]
+                    )
         return result
+
+    def get_today_remained(self):
+        """Вычисляет остаток калорий/денег за текущий день"""
+        return self.limit - self.get_today_stats()
 
 
 class Record:
@@ -48,7 +49,7 @@ class Record:
         self.amount = amount
         self.comment = comment
         if date is None:
-            self.date = dt.datetime.now().date()
+            self.date = dt.date.today()
         else:
             self.date = dt.datetime.strptime(date, '%d.%m.%Y').date()
 
@@ -57,14 +58,11 @@ class CaloriesCalculator(Calculator):
     """Калькулятор каллорий, вычисляет кол-во потребления калорий:
     за текущий день, за неделю, оставшийся лимит за день."""
 
-    def __init__(self, limit: float):
-        super().__init__(limit)
-
     def get_calories_remained(self):
         """Выводит результат проверки калькулятора калорий за текущий день."""
-        today_calories = super().get_today_stats()
+        today_calories = self.get_today_stats()
         limit = self.limit
-        calories_remained = self.limit - super().get_today_stats()
+        calories_remained = self.get_today_remained()
         if today_calories < limit:
             return ('Сегодня можно съесть что-нибудь ещё, но с общей '
                     f'калорийностью не более {calories_remained} кКал')
@@ -75,8 +73,6 @@ class CashCalculator(Calculator):
     """Калькулятор денежных расходов, вычисляет траты за день, за неделю,
     оставшийся лимит за день."""
 
-    def __init__(self, limit: float):
-        super().__init__(limit)
     USD_RATE = 60.0
     EURO_RATE = 70.0
     currency_dict = {
@@ -88,13 +84,12 @@ class CashCalculator(Calculator):
     def get_today_cash_remained(self, currency):
         """Выводит результат проверки трат за текущий день."""
         currency_name, rate = self.currency_dict[currency]
-        today_cash = super().get_today_stats()
-        today_cash_remained = round((self.limit - today_cash) / rate, 2)
+        today_cash_remained = round(self.get_today_remained() / rate, 2)
         if today_cash_remained > 0:
             return f'На сегодня осталось {today_cash_remained} {currency_name}'
         elif today_cash_remained == 0:
             return 'Денег нет, держись'
         else:
-            today_cash_remained = -1 * today_cash_remained
+            today_cash_remained = abs(today_cash_remained)
             return ('Денег нет, держись: '
                     f'твой долг - {today_cash_remained} {currency_name}')
